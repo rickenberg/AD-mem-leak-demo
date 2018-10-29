@@ -23,3 +23,26 @@ Inspect the 'Heap Size (Diff)' column. The value in parenthesis indicates the ch
 In our case, this will be quite significant. Click on the link and a detailed list will show up as shown below.
 
 ![Leak1](/Leak1.png "Managed Memory Leak")
+
+## AdLeak2 - Native Leaks ##
+Make sure that only leak2 is executed in Program.Main method.
+
+Code is leaking un-managed resources using the .NET managed code library to access Active Directory.
+Memory consumption is increasing rapidly but the managed mem profiler shows no difference. Enable code analysis while building to find one of the leaks.
+
+Now, start the debugger by pressing F5. Switch to the 'Memory Usage' tab in the 'Diagnostic Tools' window. Take a snapshop, wait a bit and take one more snapshot.
+
+Again, inspect the 'Heap Size (Diff)' column. This time there is zero diffence as shown below. But from the 'Process Memory' diagram above you can see
+that you are clearly leaking memory.
+
+![Leak2-1](/Leak2-1.png "Native Memory Leak")
+
+Try to find the memory leaks using the Code Analysis in Visual Studio. To to project settings / Code Analysis and select 'Enable Code Analysis on build' 
+and rebuild the application. This will show the error below. AdLeak3 class fixes this issue.
+```
+Warning	CA1001	Implement IDisposable on 'AdLeak2' because it creates members of the following IDisposable types: 'PrincipalContext'.
+```
+
+## AdLeak 3 - One Native Leak Remaining ##
+Make sure that only leak3 is executed in Program.Main method.
+

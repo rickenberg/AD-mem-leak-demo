@@ -17,11 +17,11 @@
             //    leak1.Execute();
             //}
 
-            //while (true)
-            //{
-            //    var leak2 = new AdLeak2();
-            //    leak2.Execute();
-            //}
+            while (true)
+            {
+                var leak2 = new AdLeak2();
+                leak2.Execute();
+            }
 
             //var leak3 = new AdLeak3();
             //while (true)
