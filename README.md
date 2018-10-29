@@ -1,5 +1,4 @@
-Memory Leak Demo
-================
+# Memory Leak Demo #
 
 This program reads one Active Directory group and gets all users from it. It is used to demonstrate how to use the Visual Studio tools to find managed and native memory leaks in your code.
 
@@ -9,7 +8,7 @@ All descriptions and screen-shots are for Visual Studio 2017.
 
 If you want to run the tool on your machine, make sure to change the value of the AdDomain field in Program class to your AD domain.
 
-#. AdLeak1 - Simple Managed Leak
+## AdLeak1 - Simple Managed Leak ##
 Make sure that only leak1 is executed in Program.Main method:
 ```
             var leak1 = new AdLeak1();
