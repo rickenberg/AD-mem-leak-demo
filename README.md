@@ -28,7 +28,9 @@ In our case, this will be quite significant. Click on the link and a detailed li
 Make sure that only leak2 is executed in Program.Main method.
 
 Code is leaking un-managed resources using the .NET managed code library to access Active Directory.
-Memory consumption is increasing rapidly but the managed mem profiler shows no difference. Enable code analysis while building to find one of the leaks.
+Memory consumption is increasing rapidly but the managed mem profiler shows no difference - inspect the Heap Size column. So we are leaking memory from un-managed or native code!
+
+Enable code analysis while building to find one of the leaks.
 
 Now, start the debugger by pressing F5. Switch to the 'Memory Usage' tab in the 'Diagnostic Tools' window. Take a snapshop, wait a bit and take one more snapshot.
 
@@ -46,3 +48,50 @@ Warning	CA1001	Implement IDisposable on 'AdLeak2' because it creates members of 
 ## AdLeak 3 - One Native Leak Remaining ##
 Make sure that only leak3 is executed in Program.Main method.
 
+Go to the MemLeaker project settings / Debug tab and enable the setting 'Enable native code debugging' as shown below.
+![Leak3-1](/Leak3-1.png "Enable native code debugging")
+
+Now, start the debugger by pressing F5. Notice the new button called 'Heap profiling' on the Memory Usage tab. Click to activate it.
+![Leak3-2](/Leak3-2.png "Enable heap profiling")
+
+You will notice two new columns being added to the grid below: Native allocations and Native Heap size. Now we can see what is going on with unmanaged code 
+memory consumption.
+
+Again, take two snapshots with some time in between. Then, click on the diff value in the Native Heap size column of the last snapshot as shown below.
+![Leak3-3](/Leak3-3.png "Native memory consumption")
+
+This opens up a new window which is completely empty. We are looking for memory leaks, so memory that is no longer in use - also called unresolved allocations.
+We need to enable these to show in the debugger. Click on the little filter icon and disable the filter 'Hide Unresolved Allocations' as shown below.
+![Leak3-4](/Leak3-4.png "Enable unresolved allocations")
+
+This shows now on row as you can see below.
+![Leak3-5](/Leak3-5.png "Show unresolved allocations")
+
+Click on the 'Unresolved allocations' row, sort by Size Diff column and then on one of the entries. Scroll-down in the call stack window below until you see something familiar.
+The screenshot below shows that the System.DirectoryServices.AccountManagement.ni.dll is involved in the memory leak - so that must have something to do with the
+code quering the AD.
+![Leak3-6](/Leak3-6.png "Inspect memory leak")
+
+The static method 'GroupPrincipal.FindByIdentity' returns a GroupPrincipal object that needs to be disposed in order to free the native resources being used.
+
+## AdNoLeak - Both leaks removed ##
+You can check-out the AdNoLeak implementation. For this little example we have found and fixed the two leak by adding using statements to the code. These take
+care of freeing the native resource once the code has finished.
+
+```
+            using (_context = new PrincipalContext(ContextType.Domain, Program.AdDomain))
+            {
+				...
+            }
+```			
+```
+            using (var group = GroupPrincipal.FindByIdentity(_context, groupName))
+            {
+				...
+            }
+```
+
+To verify the changes, run the application again with F5 and the NoAdLeak code enabled in Program.Main.
+
+The ProcessMemory graph shows clearly that the memory consumption is no longer increasing in general. There are perodic peaks and then again memory is freed.
+![NoLeak](/NoLeak.png "Inspect memory leak")

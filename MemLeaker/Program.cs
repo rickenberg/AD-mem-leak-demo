@@ -11,17 +11,17 @@
 
         static void Main(string[] args)
         {
-            //var leak1 = new AdLeak1();
-            //while (true)
-            //{
-            //    leak1.Execute();
-            //}
-
+            var leak1 = new AdLeak1();
             while (true)
             {
-                var leak2 = new AdLeak2();
-                leak2.Execute();
+                leak1.Execute();
             }
+
+            //while (true)
+            //{
+            //    var leak2 = new AdLeak2();
+            //    leak2.Execute();
+            //}
 
             //var leak3 = new AdLeak3();
             //while (true)
@@ -29,11 +29,11 @@
             //    leak3.Execute();
             //}
 
-            var noleak = new AdNoLeak();
-            while (true)
-            {
-                noleak.Execute();
-            }
+            //var noleak = new AdNoLeak();
+            //while (true)
+            //{
+            //    noleak.Execute();
+            //}
         }
     }
 }
