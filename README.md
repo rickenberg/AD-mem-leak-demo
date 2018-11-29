@@ -17,7 +17,7 @@ Make sure that only leak1 is executed in Program.Main method:
                 leak1.Execute();
             }
 ```
-Now, start the debugger by pressing F5. Switch to the 'Memory Usage' tab in the 'Diagnostic Tools' window. Take a snapshop, wait a bit and take one more snapshot.
+Now, start the debugger by pressing F5. Switch to the 'Memory Usage' tab in the 'Diagnostic Tools' window. Take a snapshot, wait a bit and take one more snapshot.
 
 Inspect the 'Heap Size (Diff)' column. The value in parenthesis indicates the change in managed memory consumption since the last snapshot. 
 In our case, this will be quite significant. Click on the link and a detailed list will show up as shown below.
@@ -32,14 +32,14 @@ Memory consumption is increasing rapidly but the managed mem profiler shows no d
 
 Enable code analysis while building to find one of the leaks.
 
-Now, start the debugger by pressing F5. Switch to the 'Memory Usage' tab in the 'Diagnostic Tools' window. Take a snapshop, wait a bit and take one more snapshot.
+Now, start the debugger by pressing F5. Switch to the 'Memory Usage' tab in the 'Diagnostic Tools' window. Take a snapshot, wait a bit and take one more snapshot.
 
-Again, inspect the 'Heap Size (Diff)' column. This time there is zero diffence as shown below. But from the 'Process Memory' diagram above you can see
+Again, inspect the 'Heap Size (Diff)' column. This time there is zero difference as shown below. But from the 'Process Memory' diagram above you can see
 that you are clearly leaking memory.
 
 ![Leak2-1](/Leak2-1.png "Native Memory Leak")
 
-Try to find the memory leaks using the Code Analysis in Visual Studio. To to project settings / Code Analysis and select 'Enable Code Analysis on build' 
+Let us try to find the memory leaks using the Code Analysis in Visual Studio. Go to project settings / Code Analysis and select 'Enable Code Analysis on build' 
 and rebuild the application. This will show the error below. AdLeak3 class fixes this issue.
 ```
 Warning	CA1001	Implement IDisposable on 'AdLeak2' because it creates members of the following IDisposable types: 'PrincipalContext'.
@@ -69,7 +69,7 @@ This shows now on row as you can see below.
 
 Click on the 'Unresolved allocations' row, sort by Size Diff column and then on one of the entries. Scroll-down in the call stack window below until you see something familiar.
 The screenshot below shows that the System.DirectoryServices.AccountManagement.ni.dll is involved in the memory leak - so that must have something to do with the
-code quering the AD.
+code querying the AD.
 ![Leak3-6](/Leak3-6.png "Inspect memory leak")
 
 The static method 'GroupPrincipal.FindByIdentity' returns a GroupPrincipal object that needs to be disposed in order to free the native resources being used.
@@ -93,5 +93,5 @@ care of freeing the native resource once the code has finished.
 
 To verify the changes, run the application again with F5 and the NoAdLeak code enabled in Program.Main.
 
-The ProcessMemory graph shows clearly that the memory consumption is no longer increasing in general. There are perodic peaks and then again memory is freed.
+The ProcessMemory graph shows clearly that the memory consumption is no longer increasing in general. There are periodic peaks and then again memory is freed.
 ![NoLeak](/NoLeak.png "Inspect memory leak")
